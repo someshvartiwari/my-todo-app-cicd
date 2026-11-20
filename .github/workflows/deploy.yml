@@ -1,0 +1,66 @@
+
+name: Todo App CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  ACR_NAME: todocontainer2026
+  ACR_LOGIN_SERVER: todocontainer2026.azurecr.io
+  RESOURCE_GROUP: rg-todo-app
+  AKS_CLUSTER: todo-aks-cluster
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login using OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Login to ACR
+        run: az acr login --name $ACR_NAME
+
+      - name: Build and Push Backend
+        run: |
+          docker build -t $ACR_LOGIN_SERVER/todo-backend:${GITHUB_SHA} ./backend
+          docker push $ACR_LOGIN_SERVER/todo-backend:${GITHUB_SHA}
+
+      - name: Build and Push Frontend
+        run: |
+          docker build -t $ACR_LOGIN_SERVER/todo-frontend:${GITHUB_SHA} ./frontend
+          docker push $ACR_LOGIN_SERVER/todo-frontend:${GITHUB_SHA}
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group $RESOURCE_GROUP \
+            --name $AKS_CLUSTER \
+            --admin \
+            --overwrite-existing
+
+      - name: Deploy Backend
+        run: |
+          kubectl set image deployment/todo-backend \
+            todo-backend=$ACR_LOGIN_SERVER/todo-backend:${GITHUB_SHA}
+          kubectl rollout status deployment/todo-backend --timeout=180s
+
+      - name: Deploy Frontend
+        run: |
+          kubectl set image deployment/todo-frontend \
+            todo-frontend=$ACR_LOGIN_SERVER/todo-frontend:${GITHUB_SHA}
+          kubectl rollout status deployment/todo-frontend --timeout=180s
