@@ -4,15 +4,6 @@ FROM maven:3.9-eclipse-temurin-21 AS build
 
 WORKDIR /app
 
-# Add Zscaler certificate temporarily during build
-RUN --mount=type=secret,id=zscaler \
-    keytool -importcert \
-    -file /run/secrets/zscaler \
-    -alias zscaler-root \
-    -cacerts \
-    -storepass changeit \
-    -noprompt
-
 COPY pom.xml .
 COPY src ./src
 

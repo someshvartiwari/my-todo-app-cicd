@@ -1,15 +1,10 @@
+
 # syntax=docker/dockerfile:1.7
 
 # Stage 1: Build React application
 FROM node:20-alpine AS build
 
 WORKDIR /app
-
-# Temporarily mount Zscaler certificate
-RUN --mount=type=secret,id=zscaler \
-    sh -c 'cat /run/secrets/zscaler >> /etc/ssl/certs/ca-certificates.crt'
-
-ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
 
 COPY package*.json ./
 
