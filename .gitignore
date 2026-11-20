@@ -1,0 +1,53 @@
+
+# Terraform dependencies
+terraform/.terraform/
+
+# Terraform state files
+terraform/*.tfstate
+terraform/*.tfstate.*
+
+# Terraform variable secrets
+terraform/terraform.tfvars
+
+# Terraform plan files
+terraform/*.tfplan
+
+# Crash logs
+terraform/crash.log
+az account show
+
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+
+# Terraform sensitive files
+**/terraform.tfvars
+**/terraform.tfvars.json
+**/*.tfstate
+**/*.tfstate.*
+**/*.tfplan
+**/.terraform/
+
+# Certificates and private keys
+**/*.pem
+**/*.key
+**/*.pfx
+**/*.crt
+
+# Kubernetes secrets and kubeconfig
+**/*secret*.yaml
+**/*secret*.yml
+**/kubeconfig*
+
+# Corporate certificates
+frontend/certs/
+**/*.crt
+**/*.pem
+**/*.key
+**/*.pfx
+
+# Kubernetes credentials
+**/kubeconfig*
